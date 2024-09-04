@@ -40,7 +40,7 @@ $services = [
     'Support Companion' => [
         'functions' => [
             'local_suppcompanion_create_course',
-            'core_user_get_users',
+            'core_user_get_users_by_field',
         ],
         'restrictedusers'   => 1, // If 1, the administrator must manually select which user can use this service.
         // (Administration > Plugins > Web services > Manage Services, Authorised users).
