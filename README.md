@@ -11,7 +11,7 @@
 * enable the webservice "Support Companion" of this plugin for the created user
 * generate a token for the user
 
-## Example curl post
+### Example curl post
 
 ```
 curl -X POST \
@@ -22,3 +22,21 @@ curl -X POST \
 "<moodle-instance>/webservice/restful/server.php/local_suppcompanion_create_course"
 ```
 
+## Added core external function `core_user_get_users_by_field`
+
+To use this function, add these capabilities to the role webservice user:
+* moodle/user:viewdetails
+* moodle/user:viewhiddendetails
+* moodle/course:useremail
+* moodle/user:update
+
+### Example curl post for `core_user_get_users_by_field`
+
+```
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Accept: application/json" \
+-H 'Authorization: {token}' \
+-d'{"field": "username", "values": ["<username>"]}' \
+"<moodle-instance>/webservice/restful/server.php/core_user_get_users_by_field"
+```
