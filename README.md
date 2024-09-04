@@ -1,8 +1,8 @@
 # Moodle local plugin as companion for the support chat prototype
 
-This local plugin defines some external functions and uses those and some core external functions in a webservice for the Support Chat Prototype (MoodleMootDACH 2024).
+This local plugin defines some external functions and uses these and some core external functions in a webservice for the Support Chat Prototype `https://github.com/MoodleNRW/multi_agent_rag_system` (DevCamp @MoodleMootDACH 2024).
 
-## Requirements and steps:
+### Requirements and steps:
 
 * `moodle-webservice_restful` plugin to accept data as json (since I did not try the new Moodle 4.5 webservices).
 * Activate webservices
@@ -14,7 +14,10 @@ This local plugin defines some external functions and uses those and some core e
 * Generate a token for the user
 * Use the token in the application to be able to call the externa functions provided by this webservice.
 
-#### Example curl post for `local_suppcompanion_create_course`
+### External function `local_suppcompanion_create_course`
+Create a course for a user in a given course category. Required parameters: userid, and course array with fields fullname, shortname, course category id.
+
+##### Example curl post for `local_suppcompanion_create_course`
 
 ```
 curl -X POST \
@@ -25,7 +28,9 @@ curl -X POST \
 "<moodle-instance>/webservice/restful/server.php/local_suppcompanion_create_course"
 ```
 
-### Added core external function `core_user_get_users_by_field`
+### Core external function `core_user_get_users_by_field`
+
+Make it possible for the application to lookup the userid given the username.
 
 To use this function, add these capabilities to the role webservice user:
 * moodle/user:viewdetails
@@ -33,7 +38,7 @@ To use this function, add these capabilities to the role webservice user:
 * moodle/course:useremail
 * moodle/user:update
 
-#### Example curl post for `core_user_get_users_by_field`
+##### Example curl post for `core_user_get_users_by_field`
 
 ```
 curl -X POST \
