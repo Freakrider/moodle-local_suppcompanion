@@ -32,6 +32,7 @@ use core_external\external_single_structure;
 use core_external\external_multiple_structure;
 use core_external\external_value;
 use core_external\external_format_value;
+use moodle_exception;
 
 /**
  * External function to create a course for a given user that will be enrolled as teacher.
@@ -137,7 +138,9 @@ class create_course extends external_api {
      * @return //json {{courseid: id}} or false
      */
     public static function execute($userid, $course) {
-        global $DB;
+        global $DB, $CFG;
+        require_once($CFG->dirroot . "/course/lib.php");
+        require_once($CFG->libdir . '/completionlib.php');
         // Validate.
         $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'course' => $course]);
         
@@ -155,9 +158,78 @@ class create_course extends external_api {
         }
         require_capability('moodle/course:create', $context, $userid);
 
+        // The next block is taken from the curren external function create_courses.
+
+        // Fullname and short name are required to be non-empty.
+        if (trim($course['fullname']) === '') {
+                throw new moodle_exception('errorinvalidparam', 'webservice', '', 'fullname');
+            } else if (trim($course['shortname']) === '') {
+                throw new moodle_exception('errorinvalidparam', 'webservice', '', 'shortname');
+            }
+
+            // Make sure lang is valid
+            if (array_key_exists('lang', $course)) {
+                if (empty($availablelangs[$course['lang']])) {
+                    throw new moodle_exception('errorinvalidparam', 'webservice', '', 'lang');
+                }
+                if (!has_capability('moodle/course:setforcedlanguage', $context)) {
+                    unset($course['lang']);
+                }
+            }
+
+            // Make sure theme is valid
+            if (array_key_exists('forcetheme', $course)) {
+                if (!empty($CFG->allowcoursethemes)) {
+                    if (empty($availablethemes[$course['forcetheme']])) {
+                        throw new moodle_exception('errorinvalidparam', 'webservice', '', 'forcetheme');
+                    } else {
+                        $course['theme'] = $course['forcetheme'];
+                    }
+                }
+            }
+
+            //set default value for completion
+            $courseconfig = get_config('moodlecourse');
+            if (\completion_info::is_enabled_for_site()) {
+                if (!array_key_exists('enablecompletion', $course)) {
+                    $course['enablecompletion'] = $courseconfig->enablecompletion;
+                }
+            } else {
+                $course['enablecompletion'] = 0;
+            }
+
+            $course['category'] = $course['categoryid'];
+
+            // Summary format.
+            $course['summaryformat'] = \core_external\util::validate_format($course['summaryformat']);
+
+            if (!empty($course['courseformatoptions'])) {
+                foreach ($course['courseformatoptions'] as $option) {
+                    $course[$option['name']] = $option['value'];
+                }
+            }
+
+            // Custom fields.
+            if (!empty($course['customfields'])) {
+                $customfields = \core_course_external::get_editable_customfields($context);
+                foreach ($course['customfields'] as $field) {
+                    if (array_key_exists($field['shortname'], $customfields)) {
+                        // Ensure we're populating the element form fields correctly.
+                        $controller = \core_customfield\data_controller::create(0, null, $customfields[$field['shortname']]);
+                        $course[$controller->get_form_element_name()] = $field['value'];
+                    }
+                }
+            }
+
+            // Note: create_course() core function check shortname, idnumber, category
+            $courseid = \create_course((object) $course)->id;
+        // End of block from core external function create_courses
+        // Enrol the user as editing teacher in this course.
+        enrol_try_internal_enrol($courseid, $userid, $CFG->creatornewrole);
+
         $transaction->allow_commit();
 
-        return ['courseid' => 42];
+        return ['courseid' => $courseid];
     }
 
 
