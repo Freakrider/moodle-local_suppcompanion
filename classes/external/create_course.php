@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die;
 use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
+use core_external\external_multiple_structure;
 use core_external\external_value;
 use core_external\external_format_value;
 
@@ -49,6 +50,7 @@ class create_course extends external_api {
         $courseconfig = get_config('moodlecourse'); //needed for many default values
         return new external_function_parameters(
             [
+                'userid' => new external_value(PARAM_INT, 'id of user', VALUE_REQUIRED),
                 'course' => new external_single_structure(
                         [
                             'fullname' => new external_value(PARAM_TEXT, 'full name'),
@@ -115,23 +117,47 @@ class create_course extends external_api {
                             )
                         ]
                     ),
-                'userid' => new external_value(PARAM_INT, 'id of user'),
             ]
         );
     }
 
     /**
      * Create course.
+     * 
+     * Example curl request
+     * curl -X POST \
+     * -H "Content-Type: application/json" \
+     * -H "Accept: application/json" \
+     * -H 'Authorization: 35be0fef0cc21dba05570ba53a0d6a1a' \
+     * -d'{"userid":"4", "course": {"fullname": "test course", "shortname": "test course short", "categoryid": "2"}}' \
+     * "http://localhost:8000/webservice/restful/server.php/local_suppcompanion_create_course"
      *
-     * @param object $course
      * @param int $userid
+     * @param object $course
      * @return //json {{courseid: id}} or false
      */
-    public static function execute($course, $userid) {
+    public static function execute($userid, $course) {
+        global $DB;
         // Validate.
-
+        $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'course' => $course]);
         
-        return json_encode(['courseid' => 42]);
+        $transaction = $DB->start_delegated_transaction();
+
+        // Ensure the current user is allowed to run this function
+        $context = \context_coursecat::instance($course['categoryid'], IGNORE_MISSING);
+        try {
+            self::validate_context($context);
+        } catch (\Exception $e) {
+            $exceptionparam = new \stdClass();
+            $exceptionparam->message = $e->getMessage();
+            $exceptionparam->catid = $course['categoryid'];
+            throw new \moodle_exception('errorcatcontextnotvalid', 'webservice', '', $exceptionparam);
+        }
+        require_capability('moodle/course:create', $context, $userid);
+
+        $transaction->allow_commit();
+
+        return ['courseid' => 42];
     }
 
 
