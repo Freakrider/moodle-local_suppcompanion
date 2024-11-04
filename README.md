@@ -8,7 +8,7 @@ This local plugin defines some external functions and uses these and some core e
 * Activate webservices
 * Activate restful protocol
 * Create user for webservices
-* Create role for webservice user and assign this role the cap `webservice/rest:use`
+* Create role for webservice user and assign this role the cap `webservice/restful:use`
 * Assign this new role to the webservice user at context level
 * Enable the webservice "Support Companion" of this plugin for the created user
 * Generate a token for the user
