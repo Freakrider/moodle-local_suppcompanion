@@ -183,15 +183,15 @@ class create_course extends external_api
     }
 
     /**
-     * Create course.
+     * Create module.
      * 
      * Example curl request
      * curl -X POST \
      * -H "Content-Type: application/json" \
      * -H "Accept: application/json" \
      * -H 'Authorization: 35be0fef0cc21dba05570ba53a0d6a1a' \
-     * -d'{"userid":"4", "course": {"fullname": "test course", "shortname": "test course short", "categoryid": "2"}}' \
-     * "http://localhost:8000/webservice/restful/server.php/local_suppcompanion_create_course"
+     * -d'{"userid":"2", "courseid":"12", "moduleinfo":{"name": "test quiz"}}' \
+     * "http://localhost:8000/webservice/restful/server.php/local_suppcompanion_create_mod"
      *
      * @param int $userid
      * @param object $course

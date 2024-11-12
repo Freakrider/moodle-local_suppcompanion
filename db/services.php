@@ -32,6 +32,11 @@ $functions = [
         'description'   => 'Create a new course for a user in a course category',
         'type'          => 'write',
         'services'      => []
+    ],    'local_suppcompanion_create_mod' => [
+        'classname'     => 'local_suppcompanion\external\create_mod',
+        'description'   => 'Create a new mod for a user in a course',
+        'type'          => 'write',
+        'services'      => []
     ],
 
 ];
