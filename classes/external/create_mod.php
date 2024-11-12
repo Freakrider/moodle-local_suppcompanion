@@ -203,7 +203,7 @@ class create_course extends external_api
         require_once($CFG->dirroot . "/course/lib.php");
         require_once($CFG->libdir . '/completionlib.php');
         // Validate.
-        $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
+        // $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
 
         $transaction = $DB->start_delegated_transaction();
 
