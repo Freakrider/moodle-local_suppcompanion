@@ -197,13 +197,13 @@ class create_course extends external_api
      * @param object $course
      * @return //json {{courseid: id}} or false
      */
-    public static function execute($userid, $course)
+    public static function execute($userid, $courseid, $moduleinfo)
     {
         global $DB, $CFG;
         require_once($CFG->dirroot . "/course/lib.php");
         require_once($CFG->libdir . '/completionlib.php');
         // Validate.
-        $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'course' => $course]);
+        $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
 
         $transaction = $DB->start_delegated_transaction();
 
@@ -217,90 +217,48 @@ class create_course extends external_api
             $exceptionparam->catid = $course['categoryid'];
             throw new \moodle_exception('errorcatcontextnotvalid', 'webservice', '', $exceptionparam);
         }
-        require_capability('moodle/course:create', $context, $userid);
+        // require_capability('moodle/course:create', $context, $userid); // capability mod:create???
+        require_capability('moodle/course:create', $context, $userid); // capability mod:create???
 
-        // The next block is taken from the curren external function create_courses.
 
-        // Make sure shortname doesnt exist and if so add a number at the end until it doesnt exist anymore.
-        $courseshortname = $course['shortname'];
-        //TODO Debug this
-        $sql = "SELECT COUNT(*) FROM {" . $CFG->prefix . "course} WHERE shortname=?";
-        if ($DB->count_records_select('course', $sql, [$courseshortname])) {
-            $courseshortname = $courseshortname .= time();
-        }
+        // Create Quiz module.
 
-        $course['shortname'] = $courseshortname;
+        $quiz = \create_module('quiz', array(
+            'course' => $courseid));
 
-        // Fullname and short name are required to be non-empty.
-        if (trim($course['fullname']) === '') {
-            throw new moodle_exception('errorinvalidparam', 'webservice', '', 'fullname');
-        } else if (trim($course['shortname']) === '') {
-            throw new moodle_exception('errorinvalidparam', 'webservice', '', 'shortname');
-        }
+        // Create questions.
 
-        // Make sure lang is valid
-        if (array_key_exists('lang', $course)) {
-            if (empty($availablelangs[$course['lang']])) {
-                throw new moodle_exception('errorinvalidparam', 'webservice', '', 'lang');
-            }
-            if (!has_capability('moodle/course:setforcedlanguage', $context)) {
-                unset($course['lang']);
-            }
-        }
+        // $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        // $context = \context_course::instance($course->id);
+        // $cat = $questiongenerator->create_question_category(array('contextid' => $context->id));
+        // $question = $questiongenerator->create_question('multichoice', null, array('category' => $cat->id));
 
-        // Make sure theme is valid
-        if (array_key_exists('forcetheme', $course)) {
-            if (!empty($CFG->allowcoursethemes)) {
-                if (empty($availablethemes[$course['forcetheme']])) {
-                    throw new moodle_exception('errorinvalidparam', 'webservice', '', 'forcetheme');
-                } else {
-                    $course['theme'] = $course['forcetheme'];
-                }
-            }
-        }
+        // // Add to the quiz.
+        // quiz_add_quiz_question($question->id, $quiz);
+        // \mod_quiz\external\submit_question_version::execute(
+        //         $DB->get_field('quiz_slots', 'id', ['quizid' => $quiz->id, 'slot' => 1]), 1);
 
-        //set default value for completion
-        $courseconfig = get_config('moodlecourse');
-        if (\completion_info::is_enabled_for_site()) {
-            if (!array_key_exists('enablecompletion', $course)) {
-                $course['enablecompletion'] = $courseconfig->enablecompletion;
-            }
-        } else {
-            $course['enablecompletion'] = 0;
-        }
+        // $questiondata = \question_bank::load_question_data($question->id);
 
-        $course['category'] = $course['categoryid'];
+        // $firstanswer = array_shift($questiondata->options->answers);
+        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/course/view.php?id=' . $course->id,
+        //     ['id' => $firstanswer->id]);
 
-        // Summary format.
-        $course['summaryformat'] = \core_external\util::validate_format($course['summaryformat']);
+        // $secondanswer = array_shift($questiondata->options->answers);
+        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/mod/quiz/view.php?id=' . $quiz->cmid,
+        //     ['id' => $secondanswer->id]);
 
-        if (!empty($course['courseformatoptions'])) {
-            foreach ($course['courseformatoptions'] as $option) {
-                $course[$option['name']] = $option['value'];
-            }
-        }
+        // $thirdanswer = array_shift($questiondata->options->answers);
+        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/grade/report/index.php?id=' . $quiz->cmid,
+        //     ['id' => $thirdanswer->id]);
 
-        // Custom fields.
-        if (!empty($course['customfields'])) {
-            $customfields = \core_course_external::get_editable_customfields($context);
-            foreach ($course['customfields'] as $field) {
-                if (array_key_exists($field['shortname'], $customfields)) {
-                    // Ensure we're populating the element form fields correctly.
-                    $controller = \core_customfield\data_controller::create(0, null, $customfields[$field['shortname']]);
-                    $course[$controller->get_form_element_name()] = $field['value'];
-                }
-            }
-        }
+        // $fourthanswer = array_shift($questiondata->options->answers);
+        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/mod/quiz/index.php?id=' . $quiz->cmid,
+        //     ['id' => $fourthanswer->id]);
 
-        // Note: create_course() core function check shortname, idnumber, category
-        $courseid = \create_course((object) $course)->id;
-        // End of block from core external function create_courses
-        // Enrol the user as editing teacher in this course.
-        enrol_try_internal_enrol($courseid, $userid, $CFG->creatornewrole);
+        // $transaction->allow_commit();
 
-        $transaction->allow_commit();
-
-        return ['courseid' => $courseid];
+        return ['modid' => $quiz->id];
     }
 
 

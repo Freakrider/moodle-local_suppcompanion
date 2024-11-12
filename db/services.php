@@ -42,7 +42,7 @@ $services = [
         'functions' => [
             'local_suppcompanion_create_course',
             'core_user_get_users_by_field',
-            'local_suppcompanion_add_quiz_to_course',
+            'local_suppcompanion_create_mod',
         ],
         'restrictedusers'   => 1, // If 1, the administrator must manually select which user can use this service.
         // (Administration > Plugins > Web services > Manage Services, Authorised users).

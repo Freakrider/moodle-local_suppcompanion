@@ -22,6 +22,33 @@ $additionalcapabilities = [
     "moodle/course:create",
     "mod/quiz:addinstance",
     "mod/quiz:manage",
+    "mod/assign:addinstance",
+    "mod/bigbluebuttonbn:addinstance",
+    "mod/book:addinstance",
+    "mod/chat:addinstance",
+    "mod/choice:addinstance",
+    "mod/data:addinstance",
+    "mod/feedback:addinstance",
+    "mod/folder:addinstance",
+    "mod/forum:addinstance",
+    "mod/glossary:addinstance",
+    "mod/h5pactivity:addinstance",
+    "mod/imscp:addinstance",
+    "mod/label:addinstance",
+    "mod/lesson:addinstance",
+    "mod/lti:addinstance",
+    "mod/page:addinstance",
+    "mod/quiz:addinstance",
+    "mod/resource:addinstance",
+    "mod/scorm:addinstance",
+    "mod/subsection:addinstance",
+    "mod/survey:addinstance",
+    "mod/url:addinstance",
+    "mod/wiki:addinstance",
+    "mod/workshop:addinstance",
+    "mod/bigbluebuttonbn:addinstancewithmeeting",
+    "mod/bigbluebuttonbn:addinstancewithrecording",
+    "moodle/course:manageactivities"
     // "webservice/restful:use",
 ];
 
@@ -103,11 +130,11 @@ if (!$service) {
     ]);
 } else {
     cli_writeln("Service $wsname exists with ID $service->id.");
-        // Authorize the user to use the service immediately after creation.
-        $webservicemanager->add_ws_authorised_user((object) [
-            'externalserviceid' => $service->id,
-            'userid' => $webserviceuser->id
-        ]);
+    // Authorize the user to use the service immediately after creation.
+    $webservicemanager->add_ws_authorised_user((object) [
+        'externalserviceid' => $service->id,
+        'userid' => $webserviceuser->id
+    ]);
 }
 
 // Authorize the user to use the service.
