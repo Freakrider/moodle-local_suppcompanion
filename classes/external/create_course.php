@@ -221,12 +221,13 @@ class create_course extends external_api
 
         // The next block is taken from the curren external function create_courses.
 
-        // Make sure shortname doesnt exist and if so add a number at the end until it doesnt exist anymore.
+        // Make sure shortname doesn't exist and if so add a number at the end until it doesn't exist anymore.
         $courseshortname = $course['shortname'];
-        //TODO Debug this
-        $sql = "SELECT COUNT(*) FROM {" . $CFG->prefix . "course} WHERE shortname=?";
-        if ($DB->count_records_select('course', $sql, [$courseshortname])) {
-            $courseshortname = $courseshortname .= time();
+
+        // Prüfen, ob der Kursname bereits existiert.
+        if ($DB->record_exists('course', ['shortname' => $courseshortname])) {
+            // Falls ja, wird ein Zeitstempel an den Kurzname angehängt, um ihn eindeutig zu machen.
+            $courseshortname .= time();
         }
 
         $course['shortname'] = $courseshortname;
