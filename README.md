@@ -24,8 +24,8 @@ curl -X POST \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -H 'Authorization: {token}' \
--d'{"userid":"4", "course": {"fullname": "test course", "shortname": "test course short", "categoryid": "2"}}' \
-"<moodle-instance>/webservice/restful/server.php/local_suppcompanion_create_course"
+-d'{"userid":"4", "course": {"fullname": "test course", "shortname": "testcourseshort", "categoryid": "2"}}' \
+"<moodle-instance>/webservice/restful/classes/server.php/local_suppcompanion_create_course"
 ```
 
 ### Core external function `core_user_get_users_by_field`
