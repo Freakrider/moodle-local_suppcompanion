@@ -189,9 +189,9 @@ class create_course extends external_api
      * curl -X POST \
      * -H "Content-Type: application/json" \
      * -H "Accept: application/json" \
-     * -H 'Authorization: 35be0fef0cc21dba05570ba53a0d6a1a' \
-     * -d'{"userid":"4", "course": {"fullname": "test course", "shortname": "test course short", "categoryid": "2"}}' \
-     * "http://localhost:8000/webservice/restful/server.php/local_suppcompanion_create_course"
+     * -H 'Authorization: 69505a04ee43cd571c454e573703773e' \
+     * -d'{"userid":"13", "course": {"fullname": "test course", "shortname": "test course short", "categoryid": "2"}}' \
+     * "http://localhost:8080/moodle-404//webservice/restful/server.php/local_suppcompanion_create_course"
      *
      * @param int $userid
      * @param object $course

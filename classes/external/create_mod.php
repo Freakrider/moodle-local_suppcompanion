@@ -71,7 +71,7 @@ class create_mod extends external_api
      * Create module.
      * 
      * Example curl request
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 782d90b3bc94c038f0f523d8eb7c2820" -d '{"userid": "15", "courseid": "12", "moduleinfo": [{"mod": "quiz", "name": "test quiz", "section": "1"}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "2", "moduleinfo": [{"mod": "quiz", "name": "test quiz", "section": "1"}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
      *
      * @param int $userid
      * @param int $courseid
@@ -117,9 +117,9 @@ class create_mod extends external_api
         if (!in_array($modType, $allowedModTypes)) {
             throw new \moodle_exception('errorinvalidmod', 'webservice', '', $modType);
         }
-        
+
         require_capability("mod/{$modType}:addinstance", $context, $userid);
-        
+
         $introText = "<p>This is the introductory text for the {$modType} module.</p>";
         $moduleInfo = (object) [
             'modulename' => $modType,
@@ -131,14 +131,13 @@ class create_mod extends external_api
                 'format' => FORMAT_HTML
             ]
         ];
-        
+
         if ($modType === 'quiz') {
             $moduleInfo->quizpassword = 'oer';
         }
-        
+
         $module = \create_module($moduleInfo);
         $modid = $module->id;
-        
 
         // Create questions.
 
@@ -170,7 +169,7 @@ class create_mod extends external_api
         // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/mod/quiz/index.php?id=' . $quiz->cmid,
         //     ['id' => $fourthanswer->id]);
 
-        // $transaction->allow_commit();
+        $transaction->allow_commit();
 
         return ['modid' => $modid];
     }
