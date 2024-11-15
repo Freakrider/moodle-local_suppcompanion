@@ -20,6 +20,7 @@ $additionalcapabilities = [
     "moodle/course:useremail",
     "moodle/user:update",
     "moodle/course:create",
+    "moodle/question:add",
     "mod/quiz:addinstance",
     "mod/quiz:manage",
     "mod/assign:addinstance",
