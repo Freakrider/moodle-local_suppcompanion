@@ -8,6 +8,27 @@ require_once($CFG->dirroot . '/lib/testing/generator/data_generator.php');
 require_once($CFG->dirroot . '/lib/externallib.php');
 require_once($CFG->dirroot . '/webservice/lib.php');
 
+//TODO HOTFIX weil LEichter
+// Prüfen, ob die Funktion bereits dem Webservice zugeordnet ist.
+$functionname = 'local_suppcompanion_create_mod';
+$existingfunction = $DB->get_record('external_functions', ['name' => $functionname]);
+
+if (!$existingfunction) {
+    // Wenn die Funktion noch nicht registriert ist, registriere sie jetzt.
+    $function = new stdClass();
+    $function->name = $functionname;
+    $function->classname = 'local_suppcompanion_external';
+    $function->methodname = 'create_mod';
+    $function->classpath = 'local/suppcompanion/externallib.php';
+    $function->component = 'local_suppcompanion';
+    $function->capabilities = 'moodle/course:manageactivities'; // Setze hier die benötigten Fähigkeiten.
+
+    $function->id = $DB->insert_record('external_functions', $function);
+    cli_writeln("Funktion $functionname zum Webservice hinzugefügt.");
+} else {
+    cli_writeln("Funktion $functionname ist bereits dem Webservice zugeordnet.");
+}
+
 // Set the variables for the new webservice.
 $wsname = 'Support Companion';
 $wsshortname = 'support_companion';
