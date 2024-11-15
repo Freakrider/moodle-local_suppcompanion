@@ -58,6 +58,7 @@ class create_mod extends external_api
                     [
                         'mod' => new external_value(PARAM_RAW, 'allowed modtype'),
                         'title' => new external_value(PARAM_RAW, 'title of the mod'),
+                        'url' => new external_value(PARAM_URL, 'URL of the file to download', VALUE_OPTIONAL),
                         'text' => new external_value(PARAM_RAW, 'intro text of the mod'),
                         'section' => new external_value(PARAM_ALPHANUM, 'section number'),
                     ]
@@ -95,12 +96,13 @@ class create_mod extends external_api
 
     /**
      * Create module.
-     * 
+     *
      * Example curl request
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "text": "This is the introductory text for the quiz", "section": "1"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "label", "title": "test label", "text": "This is the introductory text for the label", "section": "2"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "book", "title": "test book", "text": "This is the introductory text for the book", "section": "6"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": "1"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "2"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "6"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
      * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": 13, "courseid": 12, "moduleinfo": [], "questioninfos": [{"quizid": 14, "type": "multiplechoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": "0"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
 
      *
      * @param int $userid
@@ -111,7 +113,7 @@ class create_mod extends external_api
      */
     public static function execute($userid, $courseid, $moduleinfo, $questioninfos)
     {
-        //TODO 
+        //TODO
         //rename section
 
         global $DB, $CFG;
@@ -119,7 +121,9 @@ class create_mod extends external_api
         require_once($CFG->dirroot . "/course/lib.php");
         require_once($CFG->libdir . '/completionlib.php');
         require_once($CFG->dirroot . '/question/editlib.php');
+        require_once($CFG->dirroot . '/mod/resource/lib.php');
         require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
+        require_once($CFG->dirroot . '/course/modlib.php');
 
         // Validate. Valid mods quiz, questions, text
         // $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
@@ -139,6 +143,7 @@ class create_mod extends external_api
         $addedQuestions = [];
 
         $allowedModTypes = ['quiz', 'label', 'book'];
+        $allowedModTypes2 = ['resource'];
         $allowedOtherTypes = ['multiplechoice'];
 
         foreach ($moduleinfo as $module) {
@@ -185,6 +190,90 @@ class create_mod extends external_api
                         'modulename' => $module->name // Exclude moduleid if it's null
                     ];
                 }
+            } else if (in_array($modType, $allowedModTypes2)) {
+                // Download the file from the provided URL.
+                // $filecontent = self::download_file($module['url']);
+                // $filecontent = download_file_content($module['url'], null, null, false, 300, 20, false, );
+
+                // if (!$filecontent) {
+                //     throw new moodle_exception('filedownloadfailed', 'local_suppcompanion');
+                // }
+
+                // require_capability('moodle/course:managefiles', $context);
+                // Create the "resource" module in the course.
+                $draftitemid = file_get_unused_draft_itemid();
+
+                // $moduleinfo = (object) [
+                //     'modulename' => 'resource',
+                //     'course' => $courseid,
+                //     'section' => $module['section'],
+                //     'visible' => true,
+                //     'introeditor' => [
+                //         'text' => $module['text'],
+                //         'format' => FORMAT_HTML
+                //     ],
+                //     // 'files' => $draftitemid, //TODO SET
+                // ];
+
+                $thiscourse = get_fast_modinfo($courseid)->get_course();
+                list($module, $context, $cw, $cm, $data) = prepare_new_moduleinfo_data($thiscourse, 'resource', $module['section']);
+
+                add_moduleinfo($data, $thiscourse);
+                // $createdModule = \create_module($moduleinfo);
+
+                $filerecord = [
+                    'contextid' =>  \context_course::instance($courseid)->id, //TODO NEEDS OTHER CONTEXT not $context->id \context_module::instance($createdModule->id)
+                    'component' => 'mod_resource',
+                    'filearea' => 'content',
+                    'itemid' => $draftitemid,
+                    'filepath' => '/',
+                    'filename' => basename(time() . '.pdf'), //$module['title']) .
+                ];
+
+                $fs = get_file_storage();
+                $file = $fs->create_file_from_url($filerecord, $module['url']);
+
+                // Add files to user draft area.
+                // $draftitemid = file_get_unused_draft_itemid();
+                // //    $context = \context_user::instance($USER->id);
+                // //    $filerecordinline = array(
+                // //        'contextid' => $context->id,
+                // //        'component' => 'user',
+                // //        'filearea'  => 'draft',
+                // //        'itemid'    => $draftitemid,
+                // //        'filepath'  => '/',
+                // //        'filename'  => 'faketxt.txt',
+                // //    );
+                // //    $fs = get_file_storage();
+                // //    $fs->create_file_from_string($filerecordinline, 'fake txt contents 1.');
+
+
+                // // Save the file to Moodle's file storage.
+                // $filerecord = [
+                //     'contextid' => $context->id,
+                //     'component' => 'mod_resource',
+                //     'filearea' => 'content',
+                //     'itemid' => $draftitemid,
+                //     'filepath' => '/',
+                //     'filename' => basename(time() . '.pdf'), //$module['title']) .
+                // ];
+
+                // $fs = get_file_storage();
+                // $file = $fs->create_file_from_url($filerecord, $module['url']);
+
+                // $uploadinfoArray = (object) [
+                //     'course' => (object) [
+                //         'id' => '' . $courseid,
+                //     ],
+                //     'displayname' => 'test resource 1',
+                //     'coursemodule' => $createdModule->id,
+                //     'draftitemid' => $draftitemid,
+                // ];
+
+                // // Convert the array to an object
+                // $uploadinfo = (object) $uploadinfoArray;
+
+                //    resource_dndupload_handle($uploadinfo);
             } else {
                 return ['status' => 'error', 'message' => 'content not allowed'];
             }
@@ -240,7 +329,7 @@ class create_mod extends external_api
                 // $questionId = question_bank::add_question($question);
 
                 // // Add the question to the quiz.
-                // quiz_add_quiz_question($questionId, $questioninfo->quizid); // Add to quiz 
+                // quiz_add_quiz_question($questionId, $questioninfo->quizid); // Add to quiz
 
                 $addedQuestions[] = [
                     'questionid' => $questionId,
@@ -255,7 +344,6 @@ class create_mod extends external_api
 
         return ['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions];
     }
-
 
     /**
      * Returns description of method result value.
