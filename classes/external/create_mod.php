@@ -190,41 +190,17 @@ class create_mod extends external_api
                         'modulename' => $module->name // Exclude moduleid if it's null
                     ];
                 }
+                $transaction->allow_commit();
             } else if (in_array($modType, $allowedModTypes2)) {
-                // Download the file from the provided URL.
-                // $filecontent = self::download_file($module['url']);
-                // $filecontent = download_file_content($module['url'], null, null, false, 300, 20, false, );
-
-                // if (!$filecontent) {
-                //     throw new moodle_exception('filedownloadfailed', 'local_suppcompanion');
-                // }
-
                 // require_capability('moodle/course:managefiles', $context);
+
                 // Create the "resource" module in the course.
                 $draftitemid = file_get_unused_draft_itemid();
 
-                // $moduleinfo = (object) [
-                //     'modulename' => 'resource',
-                //     'course' => $courseid,
-                //     'section' => $module['section'],
-                //     'visible' => true,
-                //     'introeditor' => [
-                //         'text' => $module['text'],
-                //         'format' => FORMAT_HTML
-                //     ],
-                //     // 'files' => $draftitemid, //TODO SET
-                // ];
-
-                $thiscourse = get_fast_modinfo($courseid)->get_course();
-                list($module, $context, $cw, $cm, $data) = prepare_new_moduleinfo_data($thiscourse, 'resource', $module['section']);
-
-                add_moduleinfo($data, $thiscourse);
-                // $createdModule = \create_module($moduleinfo);
-
                 $filerecord = [
-                    'contextid' =>  \context_course::instance($courseid)->id, //TODO NEEDS OTHER CONTEXT not $context->id \context_module::instance($createdModule->id)
-                    'component' => 'mod_resource',
-                    'filearea' => 'content',
+                    'contextid' =>  \context_user::instance($userid)->id, //TODO NEEDS OTHER CONTEXT not $context->id \context_module::instance($createdModule->id)
+                    'component' => 'user',
+                    'filearea' => 'draft',
                     'itemid' => $draftitemid,
                     'filepath' => '/',
                     'filename' => basename(time() . '.pdf'), //$module['title']) .
@@ -233,47 +209,33 @@ class create_mod extends external_api
                 $fs = get_file_storage();
                 $file = $fs->create_file_from_url($filerecord, $module['url']);
 
-                // Add files to user draft area.
-                // $draftitemid = file_get_unused_draft_itemid();
-                // //    $context = \context_user::instance($USER->id);
-                // //    $filerecordinline = array(
-                // //        'contextid' => $context->id,
-                // //        'component' => 'user',
-                // //        'filearea'  => 'draft',
-                // //        'itemid'    => $draftitemid,
-                // //        'filepath'  => '/',
-                // //        'filename'  => 'faketxt.txt',
-                // //    );
-                // //    $fs = get_file_storage();
-                // //    $fs->create_file_from_string($filerecordinline, 'fake txt contents 1.');
+                $moduleinfo = (object) [
+                    'modulename' => 'resource',
+                    'course' => $courseid,
+                    'section' => $module['section'],
+                    'visible' => true,
+                    'introeditor' => [
+                        'text' => $module['text'],
+                        'format' => FORMAT_HTML
+                    ]
+                ];
 
+                $createdModule = \create_module($moduleinfo);
+                $transaction->allow_commit();
 
-                // // Save the file to Moodle's file storage.
-                // $filerecord = [
-                //     'contextid' => $context->id,
-                //     'component' => 'mod_resource',
-                //     'filearea' => 'content',
-                //     'itemid' => $draftitemid,
-                //     'filepath' => '/',
-                //     'filename' => basename(time() . '.pdf'), //$module['title']) .
-                // ];
+                $uploadinfoArray = (object) [
+                    'course' => (object) [
+                        'id' => '' . $courseid,
+                    ],
+                    'displayname' => $modTitle,
+                    'coursemodule' => $createdModule->coursemodule,
+                    'draftitemid' => $draftitemid,
+                ];
 
-                // $fs = get_file_storage();
-                // $file = $fs->create_file_from_url($filerecord, $module['url']);
+                // Convert the array to an object
+                $uploadinfo = (object) $uploadinfoArray;
 
-                // $uploadinfoArray = (object) [
-                //     'course' => (object) [
-                //         'id' => '' . $courseid,
-                //     ],
-                //     'displayname' => 'test resource 1',
-                //     'coursemodule' => $createdModule->id,
-                //     'draftitemid' => $draftitemid,
-                // ];
-
-                // // Convert the array to an object
-                // $uploadinfo = (object) $uploadinfoArray;
-
-                //    resource_dndupload_handle($uploadinfo);
+                resource_dndupload_handle($uploadinfo);
             } else {
                 return ['status' => 'error', 'message' => 'content not allowed'];
             }
@@ -335,12 +297,11 @@ class create_mod extends external_api
                     'questionid' => $questionId,
                     'questionname' => $question->name,
                 ];
+                $transaction->allow_commit();
             } else {
                 return ['status' => 'error', 'message' => 'content not allowed'];
             }
         }
-
-        $transaction->allow_commit();
 
         return ['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions];
     }
