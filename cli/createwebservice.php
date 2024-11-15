@@ -41,6 +41,7 @@ $additionalcapabilities = [
     "moodle/course:useremail",
     "moodle/user:update",
     "moodle/course:create",
+    "moodle/question:add",
     "mod/quiz:addinstance",
     "mod/quiz:manage",
     "mod/assign:addinstance",
@@ -62,14 +63,13 @@ $additionalcapabilities = [
     "mod/quiz:addinstance",
     "mod/resource:addinstance",
     "mod/scorm:addinstance",
-    "mod/subsection:addinstance",
     "mod/survey:addinstance",
     "mod/url:addinstance",
     "mod/wiki:addinstance",
     "mod/workshop:addinstance",
     "mod/bigbluebuttonbn:addinstancewithmeeting",
     "mod/bigbluebuttonbn:addinstancewithrecording",
-    "moodle/course:manageactivities"
+    "moodle/course:manageactivities",
     // "webservice/restful:use",
 ];
 

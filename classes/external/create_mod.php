@@ -31,6 +31,7 @@ use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_multiple_structure;
 use core_external\external_value;
+use core_courseformat\formatactions;
 use core_external\external_format_value;
 use moodle_exception;
 
@@ -41,226 +42,269 @@ use moodle_exception;
  * @copyright  2024 Paola Maneggia <paola.maneggia@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class create_course extends external_api
+class create_mod extends external_api
 {
-
     /**
      * Returns description of method parameters.
      * @return external_function_parameters
      */
     public static function execute_parameters()
     {
-        $courseconfig = get_config('moodlecourse'); //needed for many default values
-        return new external_function_parameters(
-            [
-                'userid' => new external_value(PARAM_INT, 'id of user', VALUE_REQUIRED),
-                'course' => new external_single_structure(
+        return new external_function_parameters([
+            'userid' => new external_value(PARAM_INT, 'User Id'),
+            'courseid' => new external_value(PARAM_INT, 'Course Id'),
+            'moduleinfo' => new external_multiple_structure(
+                new external_single_structure(
                     [
-                        'fullname' => new external_value(PARAM_TEXT, 'full name'),
-                        'shortname' => new external_value(PARAM_TEXT, 'course short name'),
-                        'categoryid' => new external_value(PARAM_INT, 'category id'),
-                        'idnumber' => new external_value(PARAM_RAW, 'id number', VALUE_OPTIONAL),
-                        'summary' => new external_value(PARAM_RAW, 'summary', VALUE_OPTIONAL),
-                        'summaryformat' => new external_format_value('summary', VALUE_DEFAULT),
-                        'format' => new external_value(
-                            PARAM_PLUGIN,
-                            'course format: weeks, topics, social, site,..',
-                            VALUE_DEFAULT,
-                            $courseconfig->format
-                        ),
-                        'showgrades' => new external_value(
-                            PARAM_INT,
-                            '1 if grades are shown, otherwise 0',
-                            VALUE_DEFAULT,
-                            $courseconfig->showgrades
-                        ),
-                        'newsitems' => new external_value(
-                            PARAM_INT,
-                            'number of recent items appearing on the course page',
-                            VALUE_DEFAULT,
-                            $courseconfig->newsitems
-                        ),
-                        'startdate' => new external_value(
-                            PARAM_INT,
-                            'timestamp when the course start',
-                            VALUE_OPTIONAL
-                        ),
-                        'enddate' => new external_value(
-                            PARAM_INT,
-                            'timestamp when the course end',
-                            VALUE_OPTIONAL
-                        ),
-                        'numsections' => new external_value(
-                            PARAM_INT,
-                            '(deprecated, use courseformatoptions) number of weeks/topics',
-                            VALUE_OPTIONAL
-                        ),
-                        'maxbytes' => new external_value(
-                            PARAM_INT,
-                            'largest size of file that can be uploaded into the course',
-                            VALUE_DEFAULT,
-                            $courseconfig->maxbytes
-                        ),
-                        'showreports' => new external_value(
-                            PARAM_INT,
-                            'are activity report shown (yes = 1, no =0)',
-                            VALUE_DEFAULT,
-                            $courseconfig->showreports
-                        ),
-                        'visible' => new external_value(
-                            PARAM_INT,
-                            '1: available to student, 0:not available',
-                            VALUE_OPTIONAL
-                        ),
-                        'hiddensections' => new external_value(
-                            PARAM_INT,
-                            '(deprecated, use courseformatoptions) How the hidden sections in the course are displayed to students',
-                            VALUE_OPTIONAL
-                        ),
-                        'groupmode' => new external_value(
-                            PARAM_INT,
-                            'no group, separate, visible',
-                            VALUE_DEFAULT,
-                            $courseconfig->groupmode
-                        ),
-                        'groupmodeforce' => new external_value(
-                            PARAM_INT,
-                            '1: yes, 0: no',
-                            VALUE_DEFAULT,
-                            $courseconfig->groupmodeforce
-                        ),
-                        'defaultgroupingid' => new external_value(
-                            PARAM_INT,
-                            'default grouping id',
-                            VALUE_DEFAULT,
-                            0
-                        ),
-                        'enablecompletion' => new external_value(
-                            PARAM_INT,
-                            'Enabled, control via completion and activity settings. Disabled,
-                                        not shown in activity settings.',
-                            VALUE_OPTIONAL
-                        ),
-                        'completionnotify' => new external_value(
-                            PARAM_INT,
-                            '1: yes 0: no',
-                            VALUE_OPTIONAL
-                        ),
-                        'lang' => new external_value(
-                            PARAM_SAFEDIR,
-                            'forced course language',
-                            VALUE_OPTIONAL
-                        ),
-                        'forcetheme' => new external_value(
-                            PARAM_PLUGIN,
-                            'name of the force theme',
-                            VALUE_OPTIONAL
-                        ),
-                        'courseformatoptions' => new external_multiple_structure(
-                            new external_single_structure(
-                                array(
-                                    'name' => new external_value(PARAM_ALPHANUMEXT, 'course format option name'),
-                                    'value' => new external_value(PARAM_RAW, 'course format option value')
-                                )
-                            ),
-                            'additional options for particular course format',
-                            VALUE_OPTIONAL
-                        ),
-                        'customfields' => new external_multiple_structure(
-                            new external_single_structure(
-                                array(
-                                    'shortname'  => new external_value(PARAM_ALPHANUMEXT, 'The shortname of the custom field'),
-                                    'value' => new external_value(PARAM_RAW, 'The value of the custom field'),
-                                )
-                            ),
-                            'custom fields for the course',
-                            VALUE_OPTIONAL
-                        )
+                        'mod' => new external_value(PARAM_RAW, 'allowed modtype'),
+                        'title' => new external_value(PARAM_RAW, 'title of the mod'),
+                        'url' => new external_value(PARAM_URL, 'URL of the file to download', VALUE_OPTIONAL),
+                        'text' => new external_value(PARAM_RAW, 'intro text of the mod'),
+                        'section' => new external_value(PARAM_ALPHANUM, 'section number'),
                     ]
                 ),
-            ]
-        );
+                'modinfo',
+                VALUE_OPTIONAL
+            ),
+            'questioninfos' =>  new external_multiple_structure(
+                new external_single_structure(
+                    [
+                        'quizid' => new external_value(PARAM_INT, 'ID of the quiz'),
+                        'type' => new external_value(PARAM_ALPHANUMEXT, 'Type of the question, e.g., multichoice'),
+                        'name' => new external_value(PARAM_RAW, 'Name of the question'),
+                        'questiontext' => new external_value(PARAM_RAW, 'Question text'),
+                        'single' => new external_value(PARAM_BOOL, 'Whether it is a single-answer question'),
+                        'shuffleanswers' => new external_value(PARAM_BOOL, 'Whether the answers should be shuffled'),
+                        'answernumbering' => new external_value(PARAM_ALPHANUM, 'Answer numbering style, e.g., abc or 123'),
+                        'answers' => new external_multiple_structure(
+                            new external_single_structure(
+                                [
+                                    'text' => new external_value(PARAM_RAW, 'Answer text'),
+                                    'fraction' => new external_value(PARAM_FLOAT, 'Fraction of the grade for this answer (1.0 for correct, 0.0 for incorrect)'),
+                                    'feedback' => new external_value(PARAM_RAW, 'Feedback for this answer'),
+                                ]
+                            ),
+                            'List of possible answers'
+                        ),
+                    ],
+                ),
+                'questioninfo',
+                VALUE_OPTIONAL
+            )
+        ]);
     }
 
     /**
      * Create module.
-     * 
+     *
      * Example curl request
-     * curl -X POST \
-     * -H "Content-Type: application/json" \
-     * -H "Accept: application/json" \
-     * -H 'Authorization: 35be0fef0cc21dba05570ba53a0d6a1a' \
-     * -d'{"userid":"2", "courseid":"12", "moduleinfo":{"name": "test quiz"}}' \
-     * "http://localhost:8000/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": "1"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "2"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "6"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": 13, "courseid": 12, "moduleinfo": [], "questioninfos": [{"quizid": 14, "type": "multiplechoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": "0"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+
      *
      * @param int $userid
-     * @param object $course
-     * @return //json {{courseid: id}} or false
+     * @param int $courseid
+     * @param object $moduleinfo
+     * @param object $questioninfos
+     * @return //['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions]
      */
-    public static function execute($userid, $courseid, $moduleinfo)
+    public static function execute($userid, $courseid, $moduleinfo, $questioninfos)
     {
+        //TODO
+        //rename section
+
         global $DB, $CFG;
+        require_once($CFG->dirroot . '/config.php');
         require_once($CFG->dirroot . "/course/lib.php");
         require_once($CFG->libdir . '/completionlib.php');
-        // Validate.
+        require_once($CFG->dirroot . '/question/editlib.php');
+        require_once($CFG->dirroot . '/mod/resource/lib.php');
+        require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
+        require_once($CFG->dirroot . '/course/modlib.php');
+
+        // Validate. Valid mods quiz, questions, text
         // $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
 
         $transaction = $DB->start_delegated_transaction();
 
         // Ensure the current user is allowed to run this function
-        $context = \context_coursecat::instance($course['categoryid'], IGNORE_MISSING);
+        $context = \context_course::instance($courseid);
         try {
             self::validate_context($context);
         } catch (\Exception $e) {
-            $exceptionparam = new \stdClass();
-            $exceptionparam->message = $e->getMessage();
-            $exceptionparam->catid = $course['categoryid'];
-            throw new \moodle_exception('errorcatcontextnotvalid', 'webservice', '', $exceptionparam);
+            //User not enrolled, make sure to use prev created course
+            return ['status' => 'error', 'message' => 'errorcoursecontextnotvalid'];
         }
-        // require_capability('moodle/course:create', $context, $userid); // capability mod:create???
-        require_capability('moodle/course:create', $context, $userid); // capability mod:create???
+
+        $addedMods = [];
+        $addedQuestions = [];
+
+        $allowedModTypes = ['quiz', 'label', 'book'];
+        $allowedModTypes2 = ['resource'];
+        $allowedOtherTypes = ['multiplechoice'];
+
+        foreach ($moduleinfo as $module) {
+            $modType = $module['mod'];
+            $modTitle = $module['title'];
+            $modText = $module['text'];
+            $modSection = $module['section'];
+            if (in_array($modType, $allowedModTypes)) {
+                require_capability("mod/{$modType}:addinstance", $context, $userid);
+
+                // Create Section if doesnt exist
+                $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection);
+                if (!$sectioninfo) {
+                    formatactions::section($courseid)->create_if_missing([$modSection]);
+                }
 
 
-        // Create Quiz module.
+                $introText = $modText;
+                $moduleInfo = (object) [
+                    'modulename' => $modType,
+                    'course' => $courseid,
+                    'section' => $modSection,
+                    'visible' => true,
+                    'introeditor' => [
+                        'text' => $introText,
+                        'format' => FORMAT_HTML
+                    ]
+                ];
 
-        $quiz = \create_module('quiz', array(
-            'course' => $courseid));
+                if ($modType === 'quiz') {
+                    $moduleInfo->quizpassword = 'oer';
+                }
 
-        // Create questions.
+                $module = \create_module($moduleInfo);
 
-        // $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
-        // $context = \context_course::instance($course->id);
-        // $cat = $questiongenerator->create_question_category(array('contextid' => $context->id));
-        // $question = $questiongenerator->create_question('multichoice', null, array('category' => $cat->id));
+                if ($module->id !== null) {
+                    $addedMods[] =  [
+                        'moduleid' => $module->id,
+                        'modulename' => $module->name
+                    ];
+                } else {
+                    $addedMods[] =  [
+                        'moduleid' => (int) 0,
+                        'modulename' => $module->name // Exclude moduleid if it's null
+                    ];
+                }
+                $transaction->allow_commit();
+            } else if (in_array($modType, $allowedModTypes2)) {
+                // require_capability('moodle/course:managefiles', $context);
 
-        // // Add to the quiz.
-        // quiz_add_quiz_question($question->id, $quiz);
-        // \mod_quiz\external\submit_question_version::execute(
-        //         $DB->get_field('quiz_slots', 'id', ['quizid' => $quiz->id, 'slot' => 1]), 1);
+                // Create the "resource" module in the course.
+                $draftitemid = file_get_unused_draft_itemid();
 
-        // $questiondata = \question_bank::load_question_data($question->id);
+                $filerecord = [
+                    'contextid' =>  \context_user::instance($userid)->id, //TODO NEEDS OTHER CONTEXT not $context->id \context_module::instance($createdModule->id)
+                    'component' => 'user',
+                    'filearea' => 'draft',
+                    'itemid' => $draftitemid,
+                    'filepath' => '/',
+                    'filename' => basename(time() . '.pdf'), //$module['title']) .
+                ];
 
-        // $firstanswer = array_shift($questiondata->options->answers);
-        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/course/view.php?id=' . $course->id,
-        //     ['id' => $firstanswer->id]);
+                $fs = get_file_storage();
+                $file = $fs->create_file_from_url($filerecord, $module['url']);
 
-        // $secondanswer = array_shift($questiondata->options->answers);
-        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/mod/quiz/view.php?id=' . $quiz->cmid,
-        //     ['id' => $secondanswer->id]);
+                $moduleinfo = (object) [
+                    'modulename' => 'resource',
+                    'course' => $courseid,
+                    'section' => $module['section'],
+                    'visible' => true,
+                    'introeditor' => [
+                        'text' => $module['text'],
+                        'format' => FORMAT_HTML
+                    ]
+                ];
 
-        // $thirdanswer = array_shift($questiondata->options->answers);
-        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/grade/report/index.php?id=' . $quiz->cmid,
-        //     ['id' => $thirdanswer->id]);
+                $createdModule = \create_module($moduleinfo);
+                $transaction->allow_commit();
 
-        // $fourthanswer = array_shift($questiondata->options->answers);
-        // $DB->set_field('question_answers', 'answer', $CFG->wwwroot . '/mod/quiz/index.php?id=' . $quiz->cmid,
-        //     ['id' => $fourthanswer->id]);
+                $uploadinfoArray = (object) [
+                    'course' => (object) [
+                        'id' => '' . $courseid,
+                    ],
+                    'displayname' => $modTitle,
+                    'coursemodule' => $createdModule->coursemodule,
+                    'draftitemid' => $draftitemid,
+                ];
 
-        // $transaction->allow_commit();
+                // Convert the array to an object
+                $uploadinfo = (object) $uploadinfoArray;
 
-        return ['modid' => $quiz->id];
+                resource_dndupload_handle($uploadinfo);
+            } else {
+                return ['status' => 'error', 'message' => 'content not allowed'];
+            }
+        }
+
+        foreach ($questioninfos as $questioninfo) {
+            //TODO add check for questiontypes other than multiplechoice
+            $qType = $questioninfo['type'];
+            if (in_array($qType, $allowedOtherTypes)) {
+                require_capability("moodle/course:manageactivities", $context, $userid);
+                // Prepare the question data.
+                $questionArray = [
+                    'category' => $questioninfo->category ?? 1, // Default to category ID 1 if not provided.
+                    'name' => $questioninfo->name,
+                    'questiontext' => $questioninfo->questiontext,
+                    'questiontextformat' => FORMAT_HTML,
+                    'generalfeedback' => $questioninfo->generalfeedback ?? '', // Optional feedback.
+                    'generalfeedbackformat' => FORMAT_HTML,
+                    'defaultmark' => $questioninfo->defaultmark ?? 1, // Default score.
+                    'penalty' => $questioninfo->penalty ?? 0.3333333, // Default penalty.
+                    'qtype' => $questioninfo->type ?? 'multichoice',
+                    'length' => 1,
+                    'hidden' => 0,
+                ];
+
+                if ($questionArray['qtype'] === 'multichoice') {
+                    $questionArray['single'] = $questioninfo->single ? 1 : 0;
+                    $questionArray['shuffleanswers'] = $questioninfo->shuffleanswers ? 1 : 0;
+                    $questionArray['answernumbering'] = $questioninfo->answernumbering ?? 'abc';
+
+                    // Process answers.
+                    $answers = $questioninfo->answers;
+                    $questionArray['answer'] = [];
+                    $questionArray['fraction'] = [];
+                    $questionArray['feedback'] = [];
+                    $questionArray['answerformat'] = [];
+                    $questionArray['feedbackformat'] = [];
+
+                    foreach ($answers as $answer) {
+                        $questionArray['answer'][] = $answer->text;
+                        $questionArray['fraction'][] = $answer->fraction;
+                        $questionArray['feedback'][] = $answer->feedback;
+                        $questionArray['answerformat'][] = FORMAT_HTML;
+                        $questionArray['feedbackformat'][] = FORMAT_HTML;
+                    }
+                }
+
+                // Convert the array to an object.
+                $question = (object) $questionArray;
+
+                //TODO Add question
+                // Add the question to the database.
+                // $questionId = question_bank::add_question($question);
+
+                // // Add the question to the quiz.
+                // quiz_add_quiz_question($questionId, $questioninfo->quizid); // Add to quiz
+
+                $addedQuestions[] = [
+                    'questionid' => $questionId,
+                    'questionname' => $question->name,
+                ];
+                $transaction->allow_commit();
+            } else {
+                return ['status' => 'error', 'message' => 'content not allowed'];
+            }
+        }
+
+        return ['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions];
     }
-
 
     /**
      * Returns description of method result value.
@@ -268,6 +312,25 @@ class create_course extends external_api
      */
     public static function execute_returns()
     {
-        return new external_single_structure(['courseid' => new external_value(PARAM_INT, 'course id')]);
+        return new external_single_structure([
+            'status' => new external_value(PARAM_TEXT, 'Response status, e.g., success or error'),
+            'message' => new external_value(PARAM_RAW, 'Error message, present only on error', VALUE_OPTIONAL),
+            'addedMods' => new external_multiple_structure(
+                new external_single_structure([
+                    'moduleid' => new external_value(PARAM_INT, 'ID of the added module', VALUE_OPTIONAL),
+                    'modulename' => new external_value(PARAM_RAW, 'Name of the added module'),
+                ]),
+                'List of added modules',
+                VALUE_OPTIONAL
+            ),
+            'addedQuestions' => new external_multiple_structure(
+                new external_single_structure([
+                    'questionid' => new external_value(PARAM_INT, 'ID of the added question'),
+                    'questionname' => new external_value(PARAM_RAW, 'Name of the added question'),
+                ]),
+                'List of added questions',
+                VALUE_OPTIONAL
+            )
+        ]);
     }
 }
