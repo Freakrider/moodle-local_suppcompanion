@@ -118,7 +118,7 @@ class create_mod extends external_api
 
         global $DB, $CFG;
         require_once($CFG->dirroot . '/config.php');
-        require_once($CFG->dirroot . "/course/lib.php");
+        require_once($CFG->dirroot . '/course/lib.php');
         require_once($CFG->libdir . '/completionlib.php');
         require_once($CFG->dirroot . '/question/editlib.php');
         require_once($CFG->dirroot . '/mod/resource/lib.php');
