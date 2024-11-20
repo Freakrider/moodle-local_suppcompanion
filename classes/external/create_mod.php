@@ -32,8 +32,6 @@ use core_external\external_single_structure;
 use core_external\external_multiple_structure;
 use core_external\external_value;
 use core_courseformat\formatactions;
-use core_external\external_format_value;
-use moodle_exception;
 
 /**
  * External function to create a course for a given user that will be enrolled as teacher.
@@ -60,7 +58,13 @@ class create_mod extends external_api
                         'title' => new external_value(PARAM_RAW, 'title of the mod'),
                         'url' => new external_value(PARAM_URL, 'URL of the file to download', VALUE_OPTIONAL),
                         'text' => new external_value(PARAM_RAW, 'intro text of the mod'),
-                        'section' => new external_value(PARAM_ALPHANUM, 'section number'),
+                        'section' => new external_single_structure(
+                            [
+                                'number' => new external_value(PARAM_ALPHANUM, 'section number'),
+                                'name' => new external_value(PARAM_RAW, 'Title of the section', VALUE_OPTIONAL),
+                                'summary' => new external_value(PARAM_RAW, 'Summary text of the section', VALUE_OPTIONAL),
+                            ]
+                        )
                     ]
                 ),
                 'modinfo',
@@ -98,11 +102,11 @@ class create_mod extends external_api
      * Create module.
      *
      * Example curl request
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": "1"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "2"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "6"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": 13, "courseid": 12, "moduleinfo": [], "questioninfos": [{"quizid": 14, "type": "multiplechoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 69505a04ee43cd571c454e573703773e" -d '{"userid": "13", "courseid": "12", "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": "0"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": {"number": 1, "name": "section name test", "summary": "<h2>Section summary h2</h2><p>Section summary block</p>"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "{"number": 2}"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "{"number": 1}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [], "questioninfos": [{"quizid": 14, "type": "multiplechoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": "{"number": "0"}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
 
      *
      * @param int $userid
@@ -155,17 +159,18 @@ class create_mod extends external_api
                 require_capability("mod/{$modType}:addinstance", $context, $userid);
 
                 // Create Section if doesnt exist
-                $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection);
+                $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
                 if (!$sectioninfo) {
-                    formatactions::section($courseid)->create_if_missing([$modSection]);
+                    formatactions::section($courseid)->create_if_missing([$modSection['number']]);
+                    $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
                 }
-
+                // $sectionaction = new core_courseformat\local\sectionactions();
 
                 $introText = $modText;
                 $moduleInfo = (object) [
                     'modulename' => $modType,
                     'course' => $courseid,
-                    'section' => $modSection,
+                    'section' => $modSection["number"],
                     'visible' => true,
                     'introeditor' => [
                         'text' => $introText,
@@ -178,6 +183,7 @@ class create_mod extends external_api
                 }
 
                 $module = \create_module($moduleInfo);
+                formatactions::section($courseid)->update($sectioninfo, (object) ['summary' => $modSection['summary'], 'summaryformat' => FORMAT_HTML, 'name' => $modSection['name'], 'visible' => true]);
 
                 if ($module->id !== null) {
                     $addedMods[] =  [
