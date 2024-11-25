@@ -32,10 +32,17 @@ $functions = [
         'description'   => 'Create a new course for a user in a course category',
         'type'          => 'write',
         'services'      => []
-    ],    'local_suppcompanion_create_mod' => [
+    ],
+    'local_suppcompanion_create_mod' => [
         'classname'     => 'local_suppcompanion\external\create_mod',
         'description'   => 'Create a new mod for a user in a course',
         'type'          => 'write',
+        'services'      => []
+    ],
+    'local_suppcompanion_get_course' => [
+        'classname'     => 'local_suppcompanion\external\get_course',
+        'description'   => 'Get course information by id or shortname',
+        'type'          => 'read',
         'services'      => []
     ],
 
@@ -46,6 +53,7 @@ $services = [
         'shortname' => 'support_companion',  // Shortname added here.
         'functions' => [
             'local_suppcompanion_create_course',
+            'local_suppcompanion_get_course',
             'core_user_get_users_by_field',
             'local_suppcompanion_create_mod',
         ],

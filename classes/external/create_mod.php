@@ -117,9 +117,6 @@ class create_mod extends external_api
      */
     public static function execute($userid, $courseid, $moduleinfo, $questioninfos)
     {
-        //TODO
-        //rename section
-
         global $DB, $CFG;
         require_once($CFG->dirroot . '/config.php');
         require_once($CFG->dirroot . '/course/lib.php');
