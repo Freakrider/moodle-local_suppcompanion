@@ -58,13 +58,14 @@ class create_mod extends external_api
                         'title' => new external_value(PARAM_RAW, 'title of the mod'),
                         'url' => new external_value(PARAM_URL, 'URL of the file to download', VALUE_OPTIONAL),
                         'text' => new external_value(PARAM_RAW, 'intro text of the mod'),
-                        'section' => new external_single_structure(
-                            [
-                                'number' => new external_value(PARAM_ALPHANUM, 'section number'),
-                                'name' => new external_value(PARAM_RAW, 'Title of the section', VALUE_OPTIONAL),
-                                'summary' => new external_value(PARAM_RAW, 'Summary text of the section', VALUE_OPTIONAL),
-                            ]
-                        )
+                        'section' =>  new external_value(PARAM_INT, 'Section number'),
+                        // 'section' => new external_single_structure(
+                        //     [
+                        //         'number' => new external_value(PARAM_ALPHANUM, 'section number'),
+                        //         'name' => new external_value(PARAM_RAW, 'Title of the section', VALUE_OPTIONAL),
+                        //         'summary' => new external_value(PARAM_RAW, 'Summary text of the section', VALUE_OPTIONAL),
+                        //     ]
+                        // )
                     ]
                 ),
                 'modinfo',
@@ -102,12 +103,12 @@ class create_mod extends external_api
      * Create module.
      *
      * Example curl request
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": {"number": 1, "name": "section name test", "summary": "<h2>Section summary h2</h2><p>Section summary block</p>"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "{"number": 2}"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "{"number": 1}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [], "questioninfos": [{"quizid": 14, "type": "multiplechoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": "13", "courseid": "14", "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": "{"number": "0"}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": {"number": 1, "name": "section name test", "summary": "<h2>Section summary h2</h2><p>Section summary block</p>"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "{"number": 2}"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "{"number": 1}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [], "questioninfos": [{"quizid": 128, "type": "multichoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": {"number": "0"}}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": 1}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
      *
      * @param int $userid
      * @param int $courseid
@@ -120,11 +121,12 @@ class create_mod extends external_api
         global $DB, $CFG;
         require_once($CFG->dirroot . '/config.php');
         require_once($CFG->dirroot . '/course/lib.php');
-        require_once($CFG->libdir . '/completionlib.php');
         require_once($CFG->dirroot . '/question/editlib.php');
         require_once($CFG->dirroot . '/mod/resource/lib.php');
         require_once($CFG->dirroot . '/question/type/multichoice/questiontype.php');
         require_once($CFG->dirroot . '/course/modlib.php');
+        require_once($CFG->dirroot . '/question/engine/bank.php');
+        require_once($CFG->libdir . '/completionlib.php');
 
         // Validate. Valid mods quiz, questions, text
         // $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
@@ -145,7 +147,7 @@ class create_mod extends external_api
 
         $allowedModTypes = ['quiz', 'label', 'book'];
         $allowedModTypes2 = ['resource'];
-        $allowedOtherTypes = ['multiplechoice'];
+        $allowedQTypes = ['multichoice'];
 
         foreach ($moduleinfo as $module) {
             $modType = $module['mod'];
@@ -245,60 +247,84 @@ class create_mod extends external_api
         }
 
         foreach ($questioninfos as $questioninfo) {
-            //TODO add check for questiontypes other than multiplechoice
+            //TODO add check for questiontypes other than multichoice
             $qType = $questioninfo['type'];
-            if (in_array($qType, $allowedOtherTypes)) {
+            if (in_array($qType, $allowedQTypes)) {
                 require_capability("moodle/course:manageactivities", $context, $userid);
                 // Prepare the question data.
-                $questionArray = [
-                    'category' => $questioninfo->category ?? 1, // Default to category ID 1 if not provided.
-                    'name' => $questioninfo->name,
-                    'questiontext' => $questioninfo->questiontext,
-                    'questiontextformat' => FORMAT_HTML,
-                    'generalfeedback' => $questioninfo->generalfeedback ?? '', // Optional feedback.
-                    'generalfeedbackformat' => FORMAT_HTML,
-                    'defaultmark' => $questioninfo->defaultmark ?? 1, // Default score.
-                    'penalty' => $questioninfo->penalty ?? 0.3333333, // Default penalty.
-                    'qtype' => $questioninfo->type ?? 'multichoice',
-                    'length' => 1,
-                    'hidden' => 0,
+                $form = new \stdClass();
+                $form->category = $questioninfo['category'] ?? 1; // Default to category ID 1 if not provided.
+                $form->name = $questioninfo['name'];
+                $form->questiontext = [
+                    'text' => $questioninfo['questiontext'],
+                    'format' => FORMAT_HTML
                 ];
+                $form->generalfeedback = [
+                    'text' => $questioninfo['generalfeedback'] ?? '', // Optional feedback.
+                    'format' => FORMAT_HTML
+                ];
+                $form->defaultmark = $questioninfo['defaultmark'] ?? 1; // Default score.
+                $form->penalty = $questioninfo['penalty'] ?? 0.3333333; // Default penalty.
+                $form->qtype = $questioninfo['type'] ?? 'multichoice';
 
-                if ($questionArray['qtype'] === 'multichoice') {
-                    $questionArray['single'] = $questioninfo->single ? 1 : 0;
-                    $questionArray['shuffleanswers'] = $questioninfo->shuffleanswers ? 1 : 0;
-                    $questionArray['answernumbering'] = $questioninfo->answernumbering ?? 'abc';
+                // \question_bank::get_qtype($form->qtype)->set_default_options($form);
+
+                if ($form->qtype === 'multichoice') {
+                    $form->single = $questioninfo['single'] ? 1 : 0;
+                    $form->shuffleanswers = $questioninfo['shuffleanswers'] ? 1 : 0;
+                    $form->answernumbering = $questioninfo['answernumbering'] ?? 'abc';
 
                     // Process answers.
-                    $answers = $questioninfo->answers;
-                    $questionArray['answer'] = [];
-                    $questionArray['fraction'] = [];
-                    $questionArray['feedback'] = [];
-                    $questionArray['answerformat'] = [];
-                    $questionArray['feedbackformat'] = [];
+                    $answers = $questioninfo['answers'];
+                    $form->answer = [];
+                    $form->fraction = [];
+                    $form->feedback = [];
 
                     foreach ($answers as $answer) {
-                        $questionArray['answer'][] = $answer->text;
-                        $questionArray['fraction'][] = $answer->fraction;
-                        $questionArray['feedback'][] = $answer->feedback;
-                        $questionArray['answerformat'][] = FORMAT_HTML;
-                        $questionArray['feedbackformat'][] = FORMAT_HTML;
+                        $answerdata = [
+                            'text' => $answer['text'],
+                            'format' => FORMAT_HTML,
+                        ];
+                        $fractiondata = $answer['fraction'];
+                        $feedbackdata = [
+                            'text' => $answer['feedback'],
+                            'format' => FORMAT_HTML
+
+                        ];
+
+                        $form->answer[] = $answerdata;
+                        $form->fraction[] = $fractiondata;
+                        $form->feedback[] = $feedbackdata;
                     }
+
+                    $correctfeedbackdata = [
+                        'text' => 'Well done!',
+                        'format' => FORMAT_HTML
+                    ];
+                    $partiallycorrectfeedbackdata = [
+                        'text' => 'Parts, but only parts, of your response are correct.',
+                        'format' => FORMAT_HTML
+                    ];
+                    $incorrectfeedbackdata = [
+                        'text' => 'That is not right at all.',
+                        'format' => FORMAT_HTML
+                    ];
+                    $form->correctfeedback = $correctfeedbackdata;
+                    $form->partiallycorrectfeedback = $partiallycorrectfeedbackdata;
+                    $form->incorrectfeedback = $incorrectfeedbackdata;
+
+                    $form->shownumcorrect = true;
                 }
+                $question = new \stdClass();
 
-                // Convert the array to an object.
-                $question = (object) $questionArray;
-
-                //TODO Add question
-                // Add the question to the database.
-                // $questionId = question_bank::add_question($question);
+                $savedQuestion = \question_bank::get_qtype($qType)->save_question($question, $form);
 
                 // // Add the question to the quiz.
-                // quiz_add_quiz_question($questionId, $questioninfo->quizid); // Add to quiz
+                // quiz_add_quiz_question($questionId, $questioninfo['quizid); // Add to quiz
 
                 $addedQuestions[] = [
-                    'questionid' => $questionId,
-                    'questionname' => $question->name,
+                    'questionid' => $savedQuestion->id,
+                    'questionname' => $savedQuestion->name,
                 ];
                 $transaction->allow_commit();
             } else {
