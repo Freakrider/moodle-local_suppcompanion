@@ -42,6 +42,10 @@ use core_courseformat\formatactions;
  */
 class create_mod extends external_api
 {
+
+    private static $allowedModTypes = ['quiz', 'label', 'book'];
+    private static $allowedModTypes2 = ['resource'];
+    private static $allowedQTypes = ['multichoice'];
     /**
      * Returns description of method parameters.
      * @return external_function_parameters
@@ -58,14 +62,14 @@ class create_mod extends external_api
                         'title' => new external_value(PARAM_RAW, 'title of the mod'),
                         'url' => new external_value(PARAM_URL, 'URL of the file to download', VALUE_OPTIONAL),
                         'text' => new external_value(PARAM_RAW, 'intro text of the mod'),
-                        'section' =>  new external_value(PARAM_INT, 'Section number'),
-                        // 'section' => new external_single_structure(
-                        //     [
-                        //         'number' => new external_value(PARAM_ALPHANUM, 'section number'),
-                        //         'name' => new external_value(PARAM_RAW, 'Title of the section', VALUE_OPTIONAL),
-                        //         'summary' => new external_value(PARAM_RAW, 'Summary text of the section', VALUE_OPTIONAL),
-                        //     ]
-                        // )
+                        // 'section' =>  new external_value(PARAM_INT, 'Section number'),
+                        'section' => new external_single_structure(
+                            [
+                                'number' => new external_value(PARAM_ALPHANUM, 'section number'),
+                                'name' => new external_value(PARAM_RAW, 'Title of the section', VALUE_OPTIONAL),
+                                'summary' => new external_value(PARAM_RAW, 'Summary text of the section', VALUE_OPTIONAL),
+                            ]
+                        )
                     ]
                 ),
                 'modinfo',
@@ -103,12 +107,12 @@ class create_mod extends external_api
      * Create module.
      *
      * Example curl request
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": {"number": 1, "name": "section name test", "summary": "<h2>Section summary h2</h2><p>Section summary block</p>"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "{"number": 2}"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "{"number": 1}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [], "questioninfos": [{"quizid": 128, "type": "multichoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": {"number": "0"}}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
-     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7a4508ba09cca94db558ce6d0237792a" -d '{"userid": 13, "courseid": 14, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": 1}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [{"mod": "quiz", "title": "test quiz", "url": "", "text": "This is the introductory text for the quiz", "section": {"number": 1, "name": "section name test", "summary": "<h2>Section summary h2</h2><p>Section summary block</p>"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [{"mod": "label", "title": "test label", "url": "", "text": "This is the introductory text for the label", "section": "{"number": 2}"}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [{"mod": "book", "title": "test book", "url": "", "text": "This is the introductory text for the book", "section": "{"number": 1}"}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [], "questioninfos": [{"quizid": 128, "category": "", "type": "multichoice", "name": "Sample Multiple Choice Question", "questiontext": "What is the capital of France?", "single": true, "shuffleanswers": true, "answernumbering": "abc", "answers": [{"text": "Paris", "fraction": 1.0, "feedback": "Correct! Paris is the capital of France."}, {"text": "London", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Berlin", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}, {"text": "Madrid", "fraction": 0.0, "feedback": "Incorrect! The capital of France is Paris."}]}]}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": {"number": "0"}}}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
+     * curl -v -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 5cb93cab9e140703514db8703f47c99d" -d '{"userid": 13, "courseid": 12, "moduleinfo": [{"mod": "resource", "title": "test file", "url": "https://surfsharekit.nl/objectstore/87d862b5-c43f-4a8e-a2af-d3a20b06d26c", "text": "This is the introductory text for the file", "section": 1}], "questioninfos": []}' "http://localhost:8080/moodle-404/webservice/restful/server.php/local_suppcompanion_create_mod"
      *
      * @param int $userid
      * @param int $courseid
@@ -131,8 +135,6 @@ class create_mod extends external_api
         // Validate. Valid mods quiz, questions, text
         // $params = self::validate_parameters(self::execute_parameters(), ['userid' => $userid, 'mod' => $moduleinfo]);
 
-        $transaction = $DB->start_delegated_transaction();
-
         // Ensure the current user is allowed to run this function
         $context = \context_course::instance($courseid);
         try {
@@ -145,115 +147,34 @@ class create_mod extends external_api
         $addedMods = [];
         $addedQuestions = [];
 
-        $allowedModTypes = ['quiz', 'label', 'book'];
-        $allowedModTypes2 = ['resource'];
-        $allowedQTypes = ['multichoice'];
+        $addedMods = self::add_module($moduleinfo, $context, $userid, $courseid);
+        $addedQuestions = self::add_questions($courseid, $userid, $context, $questioninfos);
 
-        foreach ($moduleinfo as $module) {
-            $modType = $module['mod'];
-            $modTitle = $module['title'];
-            $modText = $module['text'];
-            $modSection = $module['section'];
-            if (in_array($modType, $allowedModTypes)) {
-                require_capability("mod/{$modType}:addinstance", $context, $userid);
+        return ['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions];
+    }
 
-                // Create Section if doesnt exist
-                $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
-                if (!$sectioninfo) {
-                    formatactions::section($courseid)->create_if_missing([$modSection['number']]);
-                    $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
-                }
-                // $sectionaction = new core_courseformat\local\sectionactions();
-
-                $introText = $modText;
-                $moduleInfo = (object) [
-                    'modulename' => $modType,
-                    'course' => $courseid,
-                    'section' => $modSection["number"],
-                    'visible' => true,
-                    'introeditor' => [
-                        'text' => $introText,
-                        'format' => FORMAT_HTML
-                    ]
-                ];
-
-                if ($modType === 'quiz') {
-                    $moduleInfo->quizpassword = 'oer';
-                }
-
-                $module = \create_module($moduleInfo);
-                formatactions::section($courseid)->update($sectioninfo, (object) ['summary' => $modSection['summary'], 'summaryformat' => FORMAT_HTML, 'name' => $modSection['name'], 'visible' => true]);
-
-                if ($module->id !== null) {
-                    $addedMods[] =  [
-                        'moduleid' => $module->id,
-                        'modulename' => $module->name
-                    ];
-                } else {
-                    $addedMods[] =  [
-                        'moduleid' => (int) 0,
-                        'modulename' => $module->name // Exclude moduleid if it's null
-                    ];
-                }
-                $transaction->allow_commit();
-            } else if (in_array($modType, $allowedModTypes2)) {
-                // require_capability('moodle/course:managefiles', $context);
-
-                // Create the "resource" module in the course.
-                $draftitemid = file_get_unused_draft_itemid();
-
-                $filerecord = [
-                    'contextid' =>  \context_user::instance($userid)->id, //TODO NEEDS OTHER CONTEXT not $context->id \context_module::instance($createdModule->id)
-                    'component' => 'user',
-                    'filearea' => 'draft',
-                    'itemid' => $draftitemid,
-                    'filepath' => '/',
-                    'filename' => basename(time() . '.pdf'), //$module['title']) .
-                ];
-
-                $fs = get_file_storage();
-                $file = $fs->create_file_from_url($filerecord, $module['url']);
-
-                $moduleinfo = (object) [
-                    'modulename' => 'resource',
-                    'course' => $courseid,
-                    'section' => $module['section'],
-                    'visible' => true,
-                    'introeditor' => [
-                        'text' => $module['text'],
-                        'format' => FORMAT_HTML
-                    ]
-                ];
-
-                $createdModule = \create_module($moduleinfo);
-                $transaction->allow_commit();
-
-                $uploadinfoArray = (object) [
-                    'course' => (object) [
-                        'id' => '' . $courseid,
-                    ],
-                    'displayname' => $modTitle,
-                    'coursemodule' => $createdModule->coursemodule,
-                    'draftitemid' => $draftitemid,
-                ];
-
-                // Convert the array to an object
-                $uploadinfo = (object) $uploadinfoArray;
-
-                resource_dndupload_handle($uploadinfo);
-            } else {
-                return ['status' => 'error', 'message' => 'content not allowed'];
-            }
-        }
+    public static function add_questions($courseid, $userid, $context, $questioninfos)
+    {
+        global  $DB;
+        $addedQuestions  = [];
 
         foreach ($questioninfos as $questioninfo) {
+            $transaction = $DB->start_delegated_transaction();
             //TODO add check for questiontypes other than multichoice
             $qType = $questioninfo['type'];
-            if (in_array($qType, $allowedQTypes)) {
+
+            if (in_array($qType, self::$allowedQTypes)) {
                 require_capability("moodle/course:manageactivities", $context, $userid);
+                $cat = question_get_default_category($context->id);
+                if (!$cat) {
+                    //TODO capability to create category
+                    require_capability("moodle/course:manageactivities", $context, $userid);
+                    $cat = question_make_default_categories(array($context->id));
+                }
+
                 // Prepare the question data.
                 $form = new \stdClass();
-                $form->category = $questioninfo['category'] ?? 1; // Default to category ID 1 if not provided.
+                $form->category = $cat->id . ',' . $cat->contextid;
                 $form->name = $questioninfo['name'];
                 $form->questiontext = [
                     'text' => $questioninfo['questiontext'],
@@ -302,7 +223,7 @@ class create_mod extends external_api
                         'format' => FORMAT_HTML
                     ];
                     $partiallycorrectfeedbackdata = [
-                        'text' => 'Parts, but only parts, of your response are correct.',
+                        'text' => 'Only parts of your response are correct.',
                         'format' => FORMAT_HTML
                     ];
                     $incorrectfeedbackdata = [
@@ -315,25 +236,149 @@ class create_mod extends external_api
 
                     $form->shownumcorrect = true;
                 }
-                $question = new \stdClass();
+                $question = new stdClass();
+                $question->category = $cat->id;
+                $question->qtype = $form->qtype;
+                $question->createdby = $userid;
+
+                $question->formoptions = new stdClass();
+                $question->formoptions->canedit = true;
+                $question->formoptions->canmove = true;
+                $question->formoptions->cansaveasnew = false;
+                $question->formoptions->repeatelements = true;
+                $question->formoptions->mustbeusable = false;
+                $question->formoptions->contextid = $cat->contextid;
 
                 $savedQuestion = \question_bank::get_qtype($qType)->save_question($question, $form);
 
-                // // Add the question to the quiz.
-                // quiz_add_quiz_question($questionId, $questioninfo['quizid); // Add to quiz
+                // TODO Add the question to the quiz.
 
                 $addedQuestions[] = [
                     'questionid' => $savedQuestion->id,
                     'questionname' => $savedQuestion->name,
                 ];
                 $transaction->allow_commit();
-            } else {
-                return ['status' => 'error', 'message' => 'content not allowed'];
             }
         }
 
-        return ['status' => 'success', 'addedMods' => $addedMods, 'addedQuestions' => $addedQuestions];
+        return $addedQuestions;
     }
+
+    public static function add_module($moduleinfo, $context, $userid, $courseid)
+    {
+        global $DB;
+        $addedMods = [];
+
+        foreach ($moduleinfo as $module) {
+            $transaction = $DB->start_delegated_transaction();
+
+            $modType = $module['mod'];
+            $modTitle = $module['title'];
+            $modText = $module['text'];
+            $modSection = $module['section'];
+            if (in_array($modType, self::$allowedModTypes)) {
+                require_capability("mod/{$modType}:addinstance", $context, $userid);
+
+                // Create Section if doesnt exist
+                $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
+                if (!$sectioninfo) {
+                    formatactions::section($courseid)->create_if_missing([$modSection['number']]);
+                    $sectioninfo = get_fast_modinfo($courseid)->get_section_info($modSection['number']);
+                }
+                // $sectionaction = new core_courseformat\local\sectionactions();
+
+                $introText = $modText;
+                $moduleInfo = (object) [
+                    'modulename' => $modType,
+                    'course' => $courseid,
+                    'section' => $modSection["number"],
+                    'visible' => true,
+                    'introeditor' => [
+                        'text' => $introText,
+                        'format' => FORMAT_HTML
+                    ]
+                ];
+
+                if ($modType === 'quiz') {
+                    $moduleInfo->quizpassword = 'oer';
+                }
+
+                $module = \create_module($moduleInfo);
+                formatactions::section($courseid)->update($sectioninfo, (object) ['summary' => $modSection['summary'], 'summaryformat' => FORMAT_HTML, 'name' => $modSection['name'], 'visible' => true]);
+
+                if ($module->id !== null) {
+                    $addedMods[] =  [
+                        'moduleid' => $module->id,
+                        'modulename' => $module->name
+                    ];
+                } else {
+                    $addedMods[] =  [
+                        'moduleid' => (int) 0,
+                        'modulename' => $module->name // Exclude moduleid if it's null
+                    ];
+                }
+                $transaction->allow_commit();
+
+                return $addedMods;
+            } else if (in_array($modType, self::$allowedModTypes2)) {
+                // require_capability('moodle/course:managefiles', $context);
+
+                // Create the "resource" module in the course.
+                $draftitemid = file_get_unused_draft_itemid();
+
+                $filerecord = [
+                    'contextid' =>  \context_user::instance($userid)->id,
+                    'component' => 'user',
+                    'filearea' => 'draft',
+                    'itemid' => $draftitemid,
+                    'filepath' => '/',
+                    'filename' => basename(time() . '.pdf'), //$module['title']) .
+                ];
+
+                $fs = get_file_storage();
+                $file = $fs->create_file_from_url($filerecord, $module['url']);
+
+                $moduleinfo = (object) [
+                    'modulename' => 'resource',
+                    'course' => $courseid,
+                    'section' => $module['section'],
+                    'visible' => true,
+                    'introeditor' => [
+                        'text' => $module['text'],
+                        'format' => FORMAT_HTML
+                    ]
+                ];
+
+                $createdModule = \create_module($moduleinfo);
+                $transaction->allow_commit();
+
+                $uploadinfoArray = (object) [
+                    'course' => (object) [
+                        'id' => '' . $courseid,
+                    ],
+                    'displayname' => $modTitle,
+                    'coursemodule' => $createdModule->coursemodule,
+                    'draftitemid' => $draftitemid,
+                ];
+
+                // Convert the array to an object
+                $uploadinfo = (object) $uploadinfoArray;
+
+                resource_dndupload_handle($uploadinfo);
+
+                if ($createdModule->id !== null) {
+                    $addedMods[] =  [
+                        'moduleid' => $createdModule->id,
+                        'modulename' => $createdModule->name
+                    ];
+                }
+
+                return $addedMods;
+            }
+        }
+    }
+
+
 
     /**
      * Returns description of method result value.
